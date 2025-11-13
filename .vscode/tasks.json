@@ -1,0 +1,62 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "problemMatcher": ["$tsc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "preview",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "preview"],
+      "problemMatcher": [],
+      "isBackground": true,
+      "dependsOn": ["build"]
+    },
+    {
+      "label": "docker:build",
+      "type": "shell",
+      "command": "docker",
+      "args": ["build", "-t", "gerald-arya-portfolio", "."],
+      "problemMatcher": []
+    },
+    {
+      "label": "docker:up",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["up", "-d"],
+      "problemMatcher": []
+    },
+    {
+      "label": "docker:down",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["down"],
+      "problemMatcher": []
+    }
+  ]
+}

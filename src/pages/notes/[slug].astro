@@ -1,0 +1,122 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  return notes
+    .filter(note => !note.data.draft)
+    .map((note) => ({
+      params: { slug: note.slug },
+      props: { note },
+    }));
+}
+
+type Props = {
+  note: CollectionEntry<'notes'>;
+};
+
+const { note } = Astro.props;
+const { Content } = await note.render();
+
+const publishedDate = note.data.publishedAt.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+const updatedDate = note.data.updatedAt?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<BaseLayout 
+  title={note.data.title}
+  description={note.data.description}
+  type="article"
+  publishedTime={note.data.publishedAt.toISOString()}
+  modifiedTime={note.data.updatedAt?.toISOString()}
+>
+  <article class="section-padding">
+    <div class="container mx-auto max-w-4xl">
+      <!-- Breadcrumb -->
+      <nav class="mb-8" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm text-slate-600">
+          <li><a href="/" class="hover:text-cyan-600">Home</a></li>
+          <li><span class="text-slate-400">/</span></li>
+          <li><a href="/notes" class="hover:text-cyan-600">Notes</a></li>
+          <li><span class="text-slate-400">/</span></li>
+          <li class="text-slate-900" aria-current="page">{note.data.title}</li>
+        </ol>
+      </nav>
+
+      <!-- Article Header -->
+      <header class="mb-12">
+        {note.data.category && (
+          <span class="inline-block bg-cyan-100 text-cyan-700 text-sm font-medium px-3 py-1 rounded-full mb-4">
+            {note.data.category}
+          </span>
+        )}
+        
+        <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+          {note.data.title}
+        </h1>
+        
+        <p class="text-xl text-slate-600 mb-6">
+          {note.data.description}
+        </p>
+
+        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-6">
+          <time datetime={note.data.publishedAt.toISOString()}>
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Published: {publishedDate}
+          </time>
+          
+          {note.data.updatedAt && note.data.updatedAt.getTime() !== note.data.publishedAt.getTime() && (
+            <time datetime={note.data.updatedAt.toISOString()}>
+              <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Updated: {updatedDate}
+            </time>
+          )}
+        </div>
+
+        <!-- Tags -->
+        {note.data.tags.length > 0 && (
+          <div class="mb-6">
+            <div class="flex flex-wrap gap-2">
+              {note.data.tags.map((tag) => (
+                <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-sm">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </header>
+
+      <!-- Article Content -->
+      <div class="prose-custom">
+        <Content />
+      </div>
+
+      <!-- Navigation -->
+      <nav class="mt-12 pt-8 border-t border-slate-200">
+        <a 
+          href="/notes"
+          class="inline-flex items-center text-cyan-600 hover:text-cyan-700 font-medium"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Back to Notes
+        </a>
+      </nav>
+    </div>
+  </article>
+</BaseLayout>

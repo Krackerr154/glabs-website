@@ -1,0 +1,227 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+}
+
+const {
+  title = "Gerald Arya",
+  description = "Personal website of Gerald Arya - Developer, Researcher, and Technology Enthusiast",
+  image = "/og-image.jpg",
+  type = "website",
+  publishedTime,
+  modifiedTime
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const siteName = "Gerald Arya";
+const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalURL} />
+    
+    <title>{fullTitle}</title>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:type" content={type} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content={siteName} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(image, Astro.site)} />
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" is:inline>
+      {
+        "@context": "https://schema.org",
+        "@type": type === "article" ? "Article" : "WebSite",
+        "name": fullTitle,
+        "description": description,
+        "url": canonicalURL,
+        "author": {
+          "@type": "Person",
+          "name": "Gerald Arya"
+        }
+      }
+    </script>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
+    
+    <style is:global>
+      /* Custom properties for theme */
+      :root {
+        --color-navy: #1e293b;
+        --color-navy-light: #334155;
+        --color-navy-dark: #0f172a;
+        --color-cyan: #06b6d4;
+        --color-cyan-light: #67e8f9;
+        --color-cyan-dark: #0891b2;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-cyan-600 text-white px-4 py-2 rounded-lg z-50 font-semibold">
+      Skip to main content
+    </a>
+    
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/50 shadow-sm">
+      <nav class="container mx-auto px-4 py-5" aria-label="Main navigation">
+        <div class="flex items-center justify-between">
+          <a href="/" class="text-xl font-bold text-slate-800 hover:text-cyan-600 transition-all duration-300 flex items-center gap-2">
+            <span class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
+            Gerald Arya
+          </a>
+          
+          <ul class="hidden md:flex items-center space-x-1">
+            <li><a href="/" class="text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all duration-200 px-4 py-2 rounded-lg font-medium">Home</a></li>
+            <li><a href="/projects" class="text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all duration-200 px-4 py-2 rounded-lg font-medium">Projects</a></li>
+            <li><a href="/research" class="text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all duration-200 px-4 py-2 rounded-lg font-medium">Research</a></li>
+            <li><a href="/notes" class="text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all duration-200 px-4 py-2 rounded-lg font-medium">Notes</a></li>
+            <li><a href="/about" class="text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all duration-200 px-4 py-2 rounded-lg font-medium">About</a></li>
+            <li><a href="/contact" class="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white hover:from-cyan-600 hover:to-cyan-700 transition-all duration-200 px-5 py-2 rounded-lg font-semibold shadow-sm hover:shadow-md">Contact</a></li>
+          </ul>
+          
+          <!-- Mobile menu button -->
+          <button 
+            id="mobile-menu-button"
+            class="md:hidden p-2 text-slate-600 hover:text-cyan-600"
+            aria-label="Toggle mobile menu"
+            aria-expanded="false"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2">
+          <ul class="flex flex-col space-y-2">
+            <li><a href="/" class="block py-2 text-slate-600 hover:text-cyan-600 transition-colors">Home</a></li>
+            <li><a href="/projects" class="block py-2 text-slate-600 hover:text-cyan-600 transition-colors">Projects</a></li>
+            <li><a href="/research" class="block py-2 text-slate-600 hover:text-cyan-600 transition-colors">Research</a></li>
+            <li><a href="/notes" class="block py-2 text-slate-600 hover:text-cyan-600 transition-colors">Notes</a></li>
+            <li><a href="/about" class="block py-2 text-slate-600 hover:text-cyan-600 transition-colors">About</a></li>
+            <li><a href="/contact" class="block py-2 text-slate-600 hover:text-cyan-600 transition-colors">Contact</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main" class="min-h-screen">
+      <slot />
+    </main>
+
+    <footer class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-300 py-16 overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-cyan-500 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div class="container mx-auto px-4 relative z-10">
+        <div class="grid md:grid-cols-3 gap-12 mb-12">
+          <div>
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+              Gerald Arya
+            </h3>
+            <p class="text-slate-400 leading-relaxed">Developer, Researcher, and Technology Enthusiast passionate about building innovative solutions.</p>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-bold text-white mb-4 uppercase tracking-wider">Quick Links</h4>
+            <ul class="space-y-3">
+              <li><a href="/projects" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                Projects
+              </a></li>
+              <li><a href="/research" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                Research
+              </a></li>
+              <li><a href="/notes" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                Notes
+              </a></li>
+              <li><a href="/about" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                About
+              </a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-bold text-white mb-4 uppercase tracking-wider">Connect</h4>
+            <ul class="space-y-3">
+              <li><a href="#" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                GitHub
+              </a></li>
+              <li><a href="#" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                LinkedIn
+              </a></li>
+              <li><a href="#" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                Twitter
+              </a></li>
+              <li><a href="/contact" class="text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-2 group">
+                <span class="w-0 h-0.5 bg-cyan-400 group-hover:w-4 transition-all duration-300"></span>
+                Email
+              </a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="border-t border-slate-700/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-sm text-slate-400">
+            &copy; {new Date().getFullYear()} Gerald Arya. All rights reserved.
+          </p>
+          <p class="text-sm text-slate-500">
+            Built with <span class="text-cyan-400">❤</span> using Astro & Tailwind CSS
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Mobile menu toggle
+      document.addEventListener('DOMContentLoaded', function() {
+        const button = document.getElementById('mobile-menu-button');
+        const menu = document.getElementById('mobile-menu');
+        
+        if (button && menu) {
+          button.addEventListener('click', function() {
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', (!isExpanded).toString());
+            menu.classList.toggle('hidden');
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

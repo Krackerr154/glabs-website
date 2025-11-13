@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: glabs-website
+    ports:
+      - "8081:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - glabs-network
+    labels:
+      - "com.glabs.description=Gerald Arya's personal website"
+      - "com.glabs.version=1.0.0"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  glabs-network:
+    driver: bridge

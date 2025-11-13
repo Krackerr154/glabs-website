@@ -1,16 +1,245 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
 
+// Get featured projects and recent notes
+const allProjects = await getCollection('projects');
+const featuredProjects = allProjects
+  .filter(project => project.data.featured)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
+  .slice(0, 3);
+
+const allNotes = await getCollection('notes');
+const recentNotes = allNotes
+  .filter(note => !note.data.draft)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
+  .slice(0, 3);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout 
+  title="Gerald Arya"
+  description="Personal website of Gerald Arya - Developer, Researcher, and Technology Enthusiast"
+>
+  <!-- Hero Section -->
+  <section class="section-padding relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900 opacity-95"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-cyan-500/20 via-transparent to-transparent"></div>
+    <div class="container mx-auto text-center relative z-10">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-cyan-400 bg-clip-text text-transparent animate-gradient">
+          Gerald Arya
+        </h1>
+        <p class="text-xl md:text-2xl text-cyan-100 mb-8 leading-relaxed font-medium">
+          Developer, Researcher, and Technology Enthusiast
+        </p>
+        <p class="text-lg text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+          I build innovative solutions, conduct research, and share knowledge about technology. 
+          Passionate about creating meaningful impact through code and research.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/projects" class="btn-primary">
+            View My Work
+          </a>
+          <a href="/contact" class="btn-secondary">
+            Get In Touch
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Projects Section -->
+  <section class="section-padding bg-white">
+    <div class="container mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+          Featured Projects
+        </h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+          A showcase of my recent work and technical explorations
+        </p>
+      </div>
+      
+      {featuredProjects.length > 0 ? (
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {featuredProjects.map((project) => (
+            <article class="card p-6 hover:scale-105 transition-transform duration-200">
+              <h3 class="text-xl font-semibold text-slate-800 mb-3">
+                <a href={`/projects/${project.slug}`} class="hover:text-cyan-600 transition-colors">
+                  {project.data.title}
+                </a>
+              </h3>
+              <p class="text-slate-600 mb-4 line-clamp-3">
+                {project.data.description}
+              </p>
+              <div class="flex flex-wrap gap-2 mb-4">
+                {project.data.technologies.slice(0, 3).map((tech) => (
+                  <span class="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded-md">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+              <div class="flex items-center justify-between">
+                <a 
+                  href={`/projects/${project.slug}`}
+                  class="text-cyan-600 hover:text-cyan-700 font-medium text-sm"
+                >
+                  Learn More →
+                </a>
+                <time 
+                  class="text-xs text-slate-500"
+                  datetime={project.data.publishedAt.toISOString()}
+                >
+                  {project.data.publishedAt.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short'
+                  })}
+                </time>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-slate-600">Featured projects will appear here soon.</p>
+        </div>
+      )}
+      
+      <div class="text-center mt-12">
+        <a href="/projects" class="btn-secondary">
+          View All Projects
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Notes Section -->
+  <section class="section-padding bg-slate-50">
+    <div class="container mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+          Recent Notes
+        </h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+          Thoughts and insights on technology, research, and development
+        </p>
+      </div>
+      
+      {recentNotes.length > 0 ? (
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {recentNotes.map((note) => (
+            <article class="card p-6">
+              <div class="flex items-center gap-2 mb-3">
+                {note.data.category && (
+                  <span class="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded-md">
+                    {note.data.category}
+                  </span>
+                )}
+                <time 
+                  class="text-xs text-slate-500"
+                  datetime={note.data.publishedAt.toISOString()}
+                >
+                  {note.data.publishedAt.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </time>
+              </div>
+              <h3 class="text-xl font-semibold text-slate-800 mb-3">
+                <a href={`/notes/${note.slug}`} class="hover:text-cyan-600 transition-colors">
+                  {note.data.title}
+                </a>
+              </h3>
+              <p class="text-slate-600 mb-4 line-clamp-3">
+                {note.data.description}
+              </p>
+              <div class="flex flex-wrap gap-1 mb-4">
+                {note.data.tags.slice(0, 3).map((tag) => (
+                  <span class="text-xs text-slate-500">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+              <a 
+                href={`/notes/${note.slug}`}
+                class="text-cyan-600 hover:text-cyan-700 font-medium text-sm"
+              >
+                Read More →
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-slate-600">Recent notes will appear here soon.</p>
+        </div>
+      )}
+      
+      <div class="text-center mt-12">
+        <a href="/notes" class="btn-secondary">
+          View All Notes
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Preview Section -->
+  <section class="section-padding bg-white">
+    <div class="container mx-auto">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-6">
+          About Me
+        </h2>
+        <p class="text-lg text-slate-600 mb-8 leading-relaxed">
+          I'm a passionate developer and researcher with a focus on building innovative solutions 
+          that make a meaningful impact. My work spans across various domains including web development, 
+          research, and technology exploration.
+        </p>
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">Development</h3>
+            <p class="text-slate-600 text-sm">Building modern web applications with cutting-edge technologies</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">Research</h3>
+            <p class="text-slate-600 text-sm">Exploring new technologies and methodologies to solve complex problems</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">Knowledge Sharing</h3>
+            <p class="text-slate-600 text-sm">Writing and sharing insights to help others learn and grow</p>
+          </div>
+        </div>
+        <a href="/about" class="btn-primary">
+          Learn More About Me
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

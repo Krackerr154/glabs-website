@@ -1,0 +1,153 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allNotes = await getCollection('notes');
+const notes = allNotes
+  .filter(note => !note.data.draft)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+// Get all unique categories and tags
+const categories = [...new Set(notes.map(note => note.data.category).filter(Boolean))];
+const allTags = [...new Set(notes.flatMap(note => note.data.tags))];
+---
+
+<BaseLayout 
+  title="Notes"
+  description="Technical notes, thoughts, and insights on development, research, and technology"
+>
+  <div class="section-padding">
+    <div class="container mx-auto">
+      <!-- Page Header -->
+      <header class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+          Notes
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+          A collection of thoughts, learnings, and technical insights. 
+          Documenting my journey through technology and research.
+        </p>
+      </header>
+
+      <div class="grid lg:grid-cols-4 gap-8">
+        <!-- Sidebar -->
+        <aside class="lg:col-span-1">
+          <div class="sticky top-24">
+            {categories.length > 0 && (
+              <div class="card p-6 mb-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4">Categories</h2>
+                <ul class="space-y-2">
+                  {categories.map((category) => (
+                    <li>
+                      <a 
+                        href={`#category-${category}`}
+                        class="text-slate-600 hover:text-cyan-600 transition-colors text-sm"
+                      >
+                        {category}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {allTags.length > 0 && (
+              <div class="card p-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4">Popular Tags</h2>
+                <div class="flex flex-wrap gap-2">
+                  {allTags.slice(0, 15).map((tag) => (
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md hover:bg-cyan-100 hover:text-cyan-700 cursor-pointer transition-colors">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="lg:col-span-3">
+          {notes.length > 0 ? (
+            <div class="space-y-6">
+              {notes.map((note) => (
+                <article class="card p-6 hover:shadow-lg transition-shadow duration-200">
+                  <div class="flex items-center gap-3 mb-3">
+                    {note.data.category && (
+                      <span 
+                        id={`category-${note.data.category}`}
+                        class="bg-cyan-100 text-cyan-700 text-xs font-medium px-3 py-1 rounded-full"
+                      >
+                        {note.data.category}
+                      </span>
+                    )}
+                    <time 
+                      class="text-sm text-slate-500"
+                      datetime={note.data.publishedAt.toISOString()}
+                    >
+                      {note.data.publishedAt.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </time>
+                    {note.data.updatedAt && note.data.updatedAt.getTime() !== note.data.publishedAt.getTime() && (
+                      <span class="text-xs text-slate-400">
+                        (Updated: {note.data.updatedAt.toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })})
+                      </span>
+                    )}
+                  </div>
+                  
+                  <h2 class="text-2xl font-bold text-slate-800 mb-3">
+                    <a href={`/notes/${note.slug}`} class="hover:text-cyan-600 transition-colors">
+                      {note.data.title}
+                    </a>
+                  </h2>
+                  
+                  <p class="text-slate-600 mb-4 leading-relaxed">
+                    {note.data.description}
+                  </p>
+                  
+                  {note.data.tags.length > 0 && (
+                    <div class="flex flex-wrap gap-2 mb-4">
+                      {note.data.tags.map((tag) => (
+                        <span class="text-xs text-slate-500">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <a 
+                    href={`/notes/${note.slug}`}
+                    class="inline-flex items-center text-cyan-600 hover:text-cyan-700 font-medium text-sm"
+                  >
+                    Read Full Note
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div class="text-center py-16">
+              <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <h3 class="text-xl font-semibold text-slate-800 mb-2">No Notes Yet</h3>
+              <p class="text-slate-600 mb-6">Notes and articles will appear here soon.</p>
+              <a href="/contact" class="btn-primary">
+                Get In Touch
+              </a>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
