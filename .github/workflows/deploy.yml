@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy to NAT via Public VPS
 
 on:
   push:
@@ -9,17 +9,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (not strictly needed for SSH, but ok)
         uses: actions/checkout@v4
 
-      - name: Deploy to VPS using SSH
+      - name: SSH to Public VPS and deploy to NAT
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
+          host: ${{ secrets.VPS_HOST }}      # IP VPS-PUBLIC
+          username: ${{ secrets.VPS_USER }}  # misal: ubuntu
+          key: ${{ secrets.VPS_KEY }}        # private key untuk ke VPS-PUBLIC
           script: |
-            cd /home/ubuntu/webcontent/main-page
-            git pull
-            docker compose pull || true
-            docker compose up -d --build
+            echo "[INFO] Connected to VPS-PUBLIC"
+
+            # Dari VPS-PUBLIC, SSH ke VPS-NAT via WireGuard
+            ssh -o StrictHostKeyChecking=no ubuntu@10.10.0.2 "
+              cd /home/ubuntu/webcontent/main-page &&
+              git pull &&
+              docker compose pull || true &&
+              docker compose up -d --build
+            "
