@@ -1,0 +1,86 @@
+---
+// Individual experiment page
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { prisma } from '../../lib/db';
+import { formatDate } from '../../lib/utils';
+import { marked } from 'marked';
+
+const { slug } = Astro.params;
+
+const experiment = await prisma.experiment.findUnique({
+  where: { slug, published: true },
+});
+
+if (!experiment) {
+  return Astro.redirect('/404');
+}
+
+const contentHtml = marked(experiment.content || '');
+---
+
+<BaseLayout 
+  title={experiment.title}
+  description={experiment.summary || `Read about ${experiment.title} - Research by Gerald Arya`}
+>
+  <article class="section-padding">
+    <div class="container mx-auto max-w-4xl">
+      <!-- Breadcrumb -->
+      <nav class="mb-8" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm text-slate-600">
+          <li><a href="/" class="hover:text-cyan-600">Home</a></li>
+          <li><span class="text-slate-400">/</span></li>
+          <li><a href="/research" class="hover:text-cyan-600">Research</a></li>
+          <li><span class="text-slate-400">/</span></li>
+          <li class="text-slate-900" aria-current="page">{experiment.title}</li>
+        </ol>
+      </nav>
+
+      <!-- Article Header -->
+      <header class="mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+          {experiment.title}
+        </h1>
+        
+        {experiment.summary && (
+          <p class="text-xl text-slate-600 mb-6">
+            {experiment.summary}
+          </p>
+        )}
+
+        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+          <time datetime={experiment.createdAt.toISOString()}>
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            {formatDate(experiment.createdAt)}
+          </time>
+          
+          {experiment.updatedAt && experiment.updatedAt.getTime() !== experiment.createdAt.getTime() && (
+            <time datetime={experiment.updatedAt.toISOString()}>
+              <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Updated: {formatDate(experiment.updatedAt)}
+            </time>
+          )}
+        </div>
+      </header>
+
+      <!-- Article Content -->
+      <div class="prose-custom" set:html={contentHtml} />
+
+      <!-- Navigation -->
+      <nav class="mt-12 pt-8 border-t border-slate-200">
+        <a 
+          href="/research"
+          class="inline-flex items-center text-cyan-600 hover:text-cyan-700 font-medium"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Back to Research
+        </a>
+      </nav>
+    </div>
+  </article>
+</BaseLayout>

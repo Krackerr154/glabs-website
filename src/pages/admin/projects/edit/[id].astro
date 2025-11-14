@@ -1,0 +1,126 @@
+---
+// Admin - Edit project
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { requireAuth } from '../../../../lib/auth';
+import { prisma } from '../../../../lib/db';
+
+try {
+  requireAuth(Astro.cookies);
+} catch {
+  return Astro.redirect('/admin/login');
+}
+
+const { id } = Astro.params;
+const project = await prisma.project.findUnique({ where: { id } });
+if (!project) return Astro.redirect('/admin/projects');
+
+const techStack = JSON.parse(project.techStack || '[]').join(', ');
+
+let error = '';
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const techStackInput = formData.get('techStack')?.toString() || '';
+    const techArray = techStackInput.split(',').map(t => t.trim()).filter(t => t);
+    
+    await prisma.project.update({
+      where: { id },
+      data: {
+        title: formData.get('title')?.toString() || '',
+        slug: formData.get('slug')?.toString() || '',
+        description: formData.get('description')?.toString() || '',
+        content: formData.get('content')?.toString() || '',
+        techStack: JSON.stringify(techArray),
+        status: formData.get('status')?.toString() || 'completed',
+        githubUrl: formData.get('githubUrl')?.toString() || null,
+        liveUrl: formData.get('liveUrl')?.toString() || null,
+        featured: formData.get('featured') === 'on',
+        published: formData.get('published') === 'on',
+      },
+    });
+    return Astro.redirect('/admin/projects');
+  } catch (e: any) {
+    error = e.message || 'Failed to update project';
+  }
+}
+
+export const prerender = false;
+---
+
+<BaseLayout title="Edit Project" description="Edit project">
+  <div class="min-h-screen bg-slate-50">
+    <header class="bg-white border-b border-slate-200">
+      <div class="container mx-auto px-4 py-4">
+        <a href="/admin/projects" class="text-sm text-cyan-600 hover:text-cyan-700 mb-2 inline-block">← Back</a>
+        <h1 class="text-2xl font-bold text-slate-800">Edit Project</h1>
+      </div>
+    </header>
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+      {error && <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">{error}</div>}
+      <form method="POST" class="card p-8 space-y-6">
+        <div>
+          <label for="title" class="block text-sm font-medium text-slate-700 mb-2">Title *</label>
+          <input type="text" id="title" name="title" value={project.title} required
+            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label for="slug" class="block text-sm font-medium text-slate-700 mb-2">Slug *</label>
+          <input type="text" id="slug" name="slug" value={project.slug} required
+            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label for="description" class="block text-sm font-medium text-slate-700 mb-2">Description *</label>
+          <textarea id="description" name="description" rows="3" required
+            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none resize-none">{project.description}</textarea>
+        </div>
+        <div>
+          <label for="content" class="block text-sm font-medium text-slate-700 mb-2">Content (Markdown)</label>
+          <textarea id="content" name="content" rows="10"
+            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none font-mono text-sm">{project.content}</textarea>
+        </div>
+        <div>
+          <label for="techStack" class="block text-sm font-medium text-slate-700 mb-2">Tech Stack</label>
+          <input type="text" id="techStack" name="techStack" value={techStack}
+            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label for="status" class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+          <select id="status" name="status"
+            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none">
+            <option value="completed" selected={project.status === 'completed'}>Completed</option>
+            <option value="in-progress" selected={project.status === 'in-progress'}>In Progress</option>
+            <option value="planned" selected={project.status === 'planned'}>Planned</option>
+          </select>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="githubUrl" class="block text-sm font-medium text-slate-700 mb-2">GitHub URL</label>
+            <input type="url" id="githubUrl" name="githubUrl" value={project.githubUrl || ''}
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none" />
+          </div>
+          <div>
+            <label for="liveUrl" class="block text-sm font-medium text-slate-700 mb-2">Live URL</label>
+            <input type="url" id="liveUrl" name="liveUrl" value={project.liveUrl || ''}
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none" />
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="flex items-center">
+            <input type="checkbox" id="featured" name="featured" checked={project.featured}
+              class="w-4 h-4 text-cyan-600 border-slate-300 rounded focus:ring-cyan-500" />
+            <label for="featured" class="ml-2 text-sm font-medium text-slate-700">Feature on homepage</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="published" name="published" checked={project.published}
+              class="w-4 h-4 text-cyan-600 border-slate-300 rounded focus:ring-cyan-500" />
+            <label for="published" class="ml-2 text-sm font-medium text-slate-700">Published</label>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <button type="submit" class="btn-primary flex-1">Update Project</button>
+          <a href="/admin/projects" class="btn-secondary flex-1 text-center">Cancel</a>
+        </div>
+      </form>
+    </main>
+  </div>
+</BaseLayout>

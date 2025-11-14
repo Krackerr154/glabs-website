@@ -3,15 +3,19 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://geraldarya.com',
   integrations: [sitemap()],
+  output: 'server', // Changed from 'static' to enable SSR for admin routes
+  adapter: node({
+    mode: 'standalone'
+  }),
   vite: {
     plugins: [tailwindcss()]
   },
-  output: 'static',
   compressHTML: true,
   build: {
     inlineStylesheets: 'auto'

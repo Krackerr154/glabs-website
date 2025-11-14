@@ -1,19 +1,43 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
+import { prisma } from '../lib/db';
+import { safeJsonParse } from '../lib/utils';
 
-// Get featured projects and recent notes
-const allProjects = await getCollection('projects');
-const featuredProjects = allProjects
-  .filter(project => project.data.featured)
-  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
-  .slice(0, 3);
+// Get featured projects and recent notes from database
+const featuredProjectsData = await prisma.project.findMany({
+  where: { published: true, featured: true },
+  orderBy: { createdAt: 'desc' },
+  take: 3,
+});
 
-const allNotes = await getCollection('notes');
-const recentNotes = allNotes
-  .filter(note => !note.data.draft)
-  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
-  .slice(0, 3);
+const featuredProjects = featuredProjectsData.map(project => ({
+  ...project,
+  slug: project.slug,
+  data: {
+    title: project.title,
+    description: project.description,
+    technologies: safeJsonParse(project.techStack, []),
+    publishedAt: project.createdAt,
+  }
+}));
+
+const recentNotesData = await prisma.note.findMany({
+  where: { published: true },
+  orderBy: { createdAt: 'desc' },
+  take: 3,
+});
+
+const recentNotes = recentNotesData.map(note => ({
+  ...note,
+  slug: note.slug,
+  data: {
+    title: note.title,
+    description: note.description,
+    tags: safeJsonParse(note.tags, []),
+    publishedAt: note.createdAt,
+    category: null,
+  }
+}));
 ---
 
 <BaseLayout 

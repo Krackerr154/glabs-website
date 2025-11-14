@@ -1,35 +1,24 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { prisma } from '../../lib/db';
+import { safeJsonParse, formatDate } from '../../lib/utils';
+import { marked } from 'marked';
 
-export async function getStaticPaths() {
-  const notes = await getCollection('notes');
-  return notes
-    .filter(note => !note.data.draft)
-    .map((note) => ({
-      params: { slug: note.slug },
-      props: { note },
-    }));
+const { slug } = Astro.params;
+
+const note = await prisma.note.findUnique({
+  where: { slug, published: true },
+});
+
+if (!note) {
+  return Astro.redirect('/404');
 }
 
-type Props = {
-  note: CollectionEntry<'notes'>;
-};
+const tags = safeJsonParse(note.tags, []);
+const contentHtml = marked(note.content || '');
 
-const { note } = Astro.props;
-const { Content } = await note.render();
-
-const publishedDate = note.data.publishedAt.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-});
-
-const updatedDate = note.data.updatedAt?.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-});
+const publishedDate = formatDate(note.createdAt);
+const updatedDate = formatDate(note.updatedAt);
 ---
 
 <BaseLayout 
@@ -48,36 +37,32 @@ const updatedDate = note.data.updatedAt?.toLocaleDateString('en-US', {
           <li><span class="text-slate-400">/</span></li>
           <li><a href="/notes" class="hover:text-cyan-600">Notes</a></li>
           <li><span class="text-slate-400">/</span></li>
-          <li class="text-slate-900" aria-current="page">{note.data.title}</li>
+          <li class="text-slate-900" aria-current="page">{note.title}</li>
         </ol>
       </nav>
 
       <!-- Article Header -->
       <header class="mb-12">
-        {note.data.category && (
-          <span class="inline-block bg-cyan-100 text-cyan-700 text-sm font-medium px-3 py-1 rounded-full mb-4">
-            {note.data.category}
-          </span>
-        )}
-        
         <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-          {note.data.title}
+          {note.title}
         </h1>
         
-        <p class="text-xl text-slate-600 mb-6">
-          {note.data.description}
-        </p>
+        {note.description && (
+          <p class="text-xl text-slate-600 mb-6">
+            {note.description}
+          </p>
+        )}
 
         <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-6">
-          <time datetime={note.data.publishedAt.toISOString()}>
+          <time datetime={note.createdAt.toISOString()}>
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             Published: {publishedDate}
           </time>
           
-          {note.data.updatedAt && note.data.updatedAt.getTime() !== note.data.publishedAt.getTime() && (
-            <time datetime={note.data.updatedAt.toISOString()}>
+          {note.updatedAt && note.updatedAt.getTime() !== note.createdAt.getTime() && (
+            <time datetime={note.updatedAt.toISOString()}>
               <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
@@ -87,10 +72,10 @@ const updatedDate = note.data.updatedAt?.toLocaleDateString('en-US', {
         </div>
 
         <!-- Tags -->
-        {note.data.tags.length > 0 && (
+        {tags.length > 0 && (
           <div class="mb-6">
             <div class="flex flex-wrap gap-2">
-              {note.data.tags.map((tag) => (
+              {tags.map((tag: string) => (
                 <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-sm">
                   #{tag}
                 </span>
@@ -101,9 +86,7 @@ const updatedDate = note.data.updatedAt?.toLocaleDateString('en-US', {
       </header>
 
       <!-- Article Content -->
-      <div class="prose-custom">
-        <Content />
-      </div>
+      <div class="prose-custom" set:html={contentHtml} />
 
       <!-- Navigation -->
       <nav class="mt-12 pt-8 border-t border-slate-200">

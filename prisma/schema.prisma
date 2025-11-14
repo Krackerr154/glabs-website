@@ -1,0 +1,62 @@
+// Prisma schema for personal website backend
+// Uses SQLite for simplicity and Docker compatibility
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Admin user for authentication
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // bcrypt hashed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Blog notes/articles
+model Note {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   // Markdown content
+  description String?  // Short summary
+  tags        String   // JSON array stored as string
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Research experiments
+model Experiment {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  summary     String?
+  content     String   // Markdown content
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Projects portfolio
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String
+  content     String?  // Detailed markdown content
+  techStack   String   // JSON array stored as string
+  status      String   @default("completed") // completed, in-progress, planned
+  githubUrl   String?
+  liveUrl     String?
+  featured    Boolean  @default(false)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

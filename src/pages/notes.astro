@@ -1,15 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
+import { prisma } from '../lib/db';
+import { safeJsonParse } from '../lib/utils';
 
-const allNotes = await getCollection('notes');
-const notes = allNotes
-  .filter(note => !note.data.draft)
-  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+// Fetch published notes from database
+const allNotes = await prisma.note.findMany({
+  where: { published: true },
+  orderBy: { createdAt: 'desc' },
+});
 
-// Get all unique categories and tags
-const categories = [...new Set(notes.map(note => note.data.category).filter(Boolean))];
-const allTags = [...new Set(notes.flatMap(note => note.data.tags))];
+const notes = allNotes.map(note => ({
+  ...note,
+  tags: safeJsonParse(note.tags, []),
+}));
+
+// Get all unique tags
+const allTags = [...new Set(notes.flatMap(note => note.tags))];
+
+
 ---
 
 <BaseLayout 
@@ -33,24 +41,6 @@ const allTags = [...new Set(notes.flatMap(note => note.data.tags))];
         <!-- Sidebar -->
         <aside class="lg:col-span-1">
           <div class="sticky top-24">
-            {categories.length > 0 && (
-              <div class="card p-6 mb-6">
-                <h2 class="text-lg font-semibold text-slate-800 mb-4">Categories</h2>
-                <ul class="space-y-2">
-                  {categories.map((category) => (
-                    <li>
-                      <a 
-                        href={`#category-${category}`}
-                        class="text-slate-600 hover:text-cyan-600 transition-colors text-sm"
-                      >
-                        {category}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
             {allTags.length > 0 && (
               <div class="card p-6">
                 <h2 class="text-lg font-semibold text-slate-800 mb-4">Popular Tags</h2>
@@ -73,27 +63,19 @@ const allTags = [...new Set(notes.flatMap(note => note.data.tags))];
               {notes.map((note) => (
                 <article class="card p-6 hover:shadow-lg transition-shadow duration-200">
                   <div class="flex items-center gap-3 mb-3">
-                    {note.data.category && (
-                      <span 
-                        id={`category-${note.data.category}`}
-                        class="bg-cyan-100 text-cyan-700 text-xs font-medium px-3 py-1 rounded-full"
-                      >
-                        {note.data.category}
-                      </span>
-                    )}
                     <time 
                       class="text-sm text-slate-500"
-                      datetime={note.data.publishedAt.toISOString()}
+                      datetime={note.createdAt.toISOString()}
                     >
-                      {note.data.publishedAt.toLocaleDateString('en-US', {
+                      {note.createdAt.toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
                       })}
                     </time>
-                    {note.data.updatedAt && note.data.updatedAt.getTime() !== note.data.publishedAt.getTime() && (
+                    {note.updatedAt && note.updatedAt.getTime() !== note.createdAt.getTime() && (
                       <span class="text-xs text-slate-400">
-                        (Updated: {note.data.updatedAt.toLocaleDateString('en-US', {
+                        (Updated: {note.updatedAt.toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric'
@@ -104,17 +86,19 @@ const allTags = [...new Set(notes.flatMap(note => note.data.tags))];
                   
                   <h2 class="text-2xl font-bold text-slate-800 mb-3">
                     <a href={`/notes/${note.slug}`} class="hover:text-cyan-600 transition-colors">
-                      {note.data.title}
+                      {note.title}
                     </a>
                   </h2>
                   
-                  <p class="text-slate-600 mb-4 leading-relaxed">
-                    {note.data.description}
-                  </p>
+                  {note.description && (
+                    <p class="text-slate-600 mb-4 leading-relaxed">
+                      {note.description}
+                    </p>
+                  )}
                   
-                  {note.data.tags.length > 0 && (
+                  {note.tags.length > 0 && (
                     <div class="flex flex-wrap gap-2 mb-4">
-                      {note.data.tags.map((tag) => (
+                      {note.tags.map((tag) => (
                         <span class="text-xs text-slate-500">
                           #{tag}
                         </span>
@@ -151,3 +135,4 @@ const allTags = [...new Set(notes.flatMap(note => note.data.tags))];
     </div>
   </div>
 </BaseLayout>
+

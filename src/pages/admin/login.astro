@@ -1,0 +1,97 @@
+---
+// Admin login page
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isAuthenticated } from '../../lib/auth';
+
+// If already logged in, redirect to admin dashboard
+if (isAuthenticated(Astro.cookies)) {
+  return Astro.redirect('/admin');
+}
+
+// Handle form submission
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const email = formData.get('email')?.toString();
+  const password = formData.get('password')?.toString();
+  
+  if (email && password) {
+    const { authenticate, createSession, setSessionCookie } = await import('../../lib/auth');
+    const userId = await authenticate(email, password);
+    
+    if (userId) {
+      const sessionId = createSession(userId);
+      setSessionCookie(Astro.cookies, sessionId);
+      return Astro.redirect('/admin');
+    }
+  }
+}
+
+ // Enable SSR for this page
+---
+
+<BaseLayout title="Admin Login" description="Login to the admin panel">
+  <section class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div class="text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
+          Admin Login
+        </h1>
+        <p class="text-slate-600">
+          Sign in to manage your content
+        </p>
+      </div>
+      
+      <div class="card p-8">
+        <form method="POST" class="space-y-6">
+          <div>
+            <label for="email" class="block text-sm font-medium text-slate-700 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+              placeholder="admin@example.com"
+            />
+          </div>
+          
+          <div>
+            <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+              placeholder="Enter your password"
+            />
+          </div>
+          
+          <button
+            type="submit"
+            class="w-full btn-primary text-center"
+          >
+            Sign In
+          </button>
+        </form>
+        
+        <div class="mt-6 text-center">
+          <a href="/" class="text-sm text-cyan-600 hover:text-cyan-700">
+            ← Back to Home
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  input:focus {
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+  }
+</style>
+
