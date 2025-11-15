@@ -1,35 +1,29 @@
-# Build stage
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
+# 1) Install dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source code
+# 2) Copy source code
 COPY . .
 
-# Build the application
+# 3) Prisma: set database URL (SQLite file di dalam container)
+ENV DATABASE_URL="file:./prisma/dev.db"
+
+# Generate Prisma client dan sync schema
+RUN npx prisma generate
+RUN npx prisma db push
+
+# 4) Build Astro (SSR)
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# 5) Runtime env
+ENV NODE_ENV=production
+ENV PORT=4321
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 4321
 
-# Copy built assets from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# 6) Start Astro Node adapter
+CMD ["node", "./dist/server/entry.mjs"]
