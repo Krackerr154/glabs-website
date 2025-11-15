@@ -1,7 +1,19 @@
 {
-  "name": "main-page",
+  "name": "glabs-website",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Gerald Arya's personal website - A modern, fast, and accessible portfolio built with Astro",
+  "author": {
+    "name": "Gerald Arya Dewangga",
+    "email": "gerald.arya154@gmail.com",
+    "url": "https://github.com/Krackerr154"
+  },
+  "homepage": "https://github.com/Krackerr154/glabs-website",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Krackerr154/glabs-website.git"
+  },
+  "keywords": ["astro", "portfolio", "website", "tailwindcss", "typescript"],
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

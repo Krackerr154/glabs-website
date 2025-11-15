@@ -1,9 +1,9 @@
 // Authentication utilities for session management
 import type { AstroCookies } from 'astro';
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { prisma } from './db';
 
-const SESSION_COOKIE_NAME = 'admin_session';
+const SESSION_COOKIE_NAME = 'session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 /**
@@ -28,6 +28,9 @@ export function createSession(userId: string): string {
   
   sessions.set(sessionId, { userId, expiresAt });
   
+  console.log('DEBUG: createSession - sessionId:', sessionId);
+  console.log('DEBUG: createSession - sessions size after:', sessions.size);
+  
   return sessionId;
 }
 
@@ -36,16 +39,29 @@ export function createSession(userId: string): string {
  */
 export function getSession(cookies: AstroCookies): { userId: string } | null {
   const sessionId = cookies.get(SESSION_COOKIE_NAME)?.value;
+  const testCookie = cookies.get('test')?.value;
+  const simpleCookie = cookies.get('simple')?.value;
   
-  if (!sessionId) return null;
+  console.log('DEBUG: getSession - sessionId:', sessionId);
+  console.log('DEBUG: getSession - testCookie:', testCookie);
+  console.log('DEBUG: getSession - simpleCookie:', simpleCookie);
+  console.log('DEBUG: getSession - sessions size:', sessions.size);
+  console.log('DEBUG: getSession - sessions keys:', Array.from(sessions.keys()));
   
-  const session = sessions.get(sessionId);
+  // Try any of the cookies
+  const actualSessionId = sessionId || simpleCookie;
+  
+  if (!actualSessionId) return null;
+  
+  const session = sessions.get(actualSessionId);
+  
+  console.log('DEBUG: getSession - found session:', !!session);
   
   if (!session) return null;
   
   // Check if session is expired
   if (session.expiresAt < new Date()) {
-    sessions.delete(sessionId);
+    sessions.delete(actualSessionId);
     return null;
   }
   
@@ -63,13 +79,14 @@ export function deleteSession(sessionId: string): void {
  * Set session cookie
  */
 export function setSessionCookie(cookies: AstroCookies, sessionId: string): void {
-  cookies.set(SESSION_COOKIE_NAME, sessionId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: SESSION_MAX_AGE,
-    path: '/',
-  });
+  console.log('DEBUG: setSessionCookie - sessionId:', sessionId);
+  
+  // Try multiple cookie approaches
+  cookies.set(SESSION_COOKIE_NAME, sessionId);
+  cookies.set('test', 'value123');
+  cookies.set('simple', sessionId, { path: '/' });
+  
+  console.log('DEBUG: setSessionCookie - cookies set');
 }
 
 /**

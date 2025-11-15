@@ -201,4 +201,8 @@ Your note content here...
 
 ## 🤝 Contact
 
-For inquiries, please use the contact form on the website or reach out directly at contact@geraldarya.com
+- **Email**: [gerald.arya154@gmail.com](mailto:gerald.arya154@gmail.com)
+- **LinkedIn**: [Gerald Arya Dewangga](https://www.linkedin.com/in/gerald-arya-dewangga-06842a283)
+- **GitHub**: [Krackerr154](https://github.com/Krackerr154)
+
+For inquiries, please use the contact form on the website or reach out directly via email.
