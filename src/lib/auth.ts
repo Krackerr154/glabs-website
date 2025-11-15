@@ -7,12 +7,6 @@ const SESSION_COOKIE_NAME = 'session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 /**
- * Simple session store (in-memory for single admin user)
- * In production with multiple servers, use Redis or database-backed sessions
- */
-const sessions = new Map<string, { userId: string; expiresAt: Date }>();
-
-/**
  * Generate a random session ID
  */
 function generateSessionId(): string {
@@ -22,16 +16,18 @@ function generateSessionId(): string {
 /**
  * Create a new session for a user
  */
-export function createSession(userId: string): string {
+export async function createSession(userId: string): Promise<string> {
   const sessionId = generateSessionId();
   const expiresAt = new Date(Date.now() + SESSION_MAX_AGE * 1000);
   
-  sessions.set(sessionId, { userId, expiresAt });
+  // Store session in database (create a simple Session table would be better, but for now use a simple approach)
+  // For simplicity, we'll just encode the session info in the sessionId itself
+  const sessionData = JSON.stringify({ userId, expiresAt: expiresAt.toISOString() });
+  const encodedSession = Buffer.from(sessionData).toString('base64');
   
-  console.log('DEBUG: createSession - sessionId:', sessionId);
-  console.log('DEBUG: createSession - sessions size after:', sessions.size);
+  console.log('DEBUG: createSession - sessionId:', sessionId, 'encoded:', encodedSession);
   
-  return sessionId;
+  return encodedSession;
 }
 
 /**
@@ -39,40 +35,42 @@ export function createSession(userId: string): string {
  */
 export function getSession(cookies: AstroCookies): { userId: string } | null {
   const sessionId = cookies.get(SESSION_COOKIE_NAME)?.value;
-  const testCookie = cookies.get('test')?.value;
   const simpleCookie = cookies.get('simple')?.value;
   
   console.log('DEBUG: getSession - sessionId:', sessionId);
-  console.log('DEBUG: getSession - testCookie:', testCookie);
   console.log('DEBUG: getSession - simpleCookie:', simpleCookie);
-  console.log('DEBUG: getSession - sessions size:', sessions.size);
-  console.log('DEBUG: getSession - sessions keys:', Array.from(sessions.keys()));
   
   // Try any of the cookies
   const actualSessionId = sessionId || simpleCookie;
   
   if (!actualSessionId) return null;
   
-  const session = sessions.get(actualSessionId);
-  
-  console.log('DEBUG: getSession - found session:', !!session);
-  
-  if (!session) return null;
-  
-  // Check if session is expired
-  if (session.expiresAt < new Date()) {
-    sessions.delete(actualSessionId);
+  try {
+    // Decode the session data
+    const sessionData = JSON.parse(Buffer.from(actualSessionId, 'base64').toString());
+    const expiresAt = new Date(sessionData.expiresAt);
+    
+    console.log('DEBUG: getSession - found session data:', { userId: sessionData.userId, expiresAt });
+    
+    // Check if session is expired
+    if (expiresAt < new Date()) {
+      console.log('DEBUG: getSession - session expired');
+      return null;
+    }
+    
+    return { userId: sessionData.userId };
+  } catch (error) {
+    console.log('DEBUG: getSession - failed to decode session:', error);
     return null;
   }
-  
-  return { userId: session.userId };
 }
 
 /**
- * Delete a session
+ * Delete a session (with encoded sessions, we don't need to track them)
  */
 export function deleteSession(sessionId: string): void {
-  sessions.delete(sessionId);
+  // With encoded sessions, we don't need to delete anything
+  console.log('DEBUG: deleteSession - session deleted (no-op):', sessionId);
 }
 
 /**
@@ -81,12 +79,19 @@ export function deleteSession(sessionId: string): void {
 export function setSessionCookie(cookies: AstroCookies, sessionId: string): void {
   console.log('DEBUG: setSessionCookie - sessionId:', sessionId);
   
-  // Try multiple cookie approaches
-  cookies.set(SESSION_COOKIE_NAME, sessionId);
-  cookies.set('test', 'value123');
+  // Set the session cookie with proper options
+  cookies.set(SESSION_COOKIE_NAME, sessionId, {
+    path: '/',
+    httpOnly: true,
+    secure: false, // Set to false for development, true for production
+    sameSite: 'lax',
+    maxAge: SESSION_MAX_AGE
+  });
+  
+  // Also set a simple test cookie
   cookies.set('simple', sessionId, { path: '/' });
   
-  console.log('DEBUG: setSessionCookie - cookies set');
+  console.log('DEBUG: setSessionCookie - cookies set with options');
 }
 
 /**
