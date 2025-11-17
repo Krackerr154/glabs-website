@@ -18,9 +18,9 @@ let stats = {
   publishedProjects: 0
 };
 
-// Validate token using persistent storage
+// Validate token using database
 if (token) {
-  const tokenData = validateToken(token);
+  const tokenData = await validateToken(token);
   if (tokenData) {
     isAuthenticated = true;
     

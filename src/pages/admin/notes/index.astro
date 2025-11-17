@@ -10,7 +10,7 @@ const url = new URL(Astro.request.url);
 const token = url.searchParams.get('token');
 
 // Validate token
-if (!token || !validateToken(token)) {
+if (!token || !(await validateToken(token))) {
   console.log('Invalid or missing token, redirecting to login');
   return Astro.redirect('/admin/auth');
 }

@@ -1,73 +1,52 @@
-// Simple file-based token storage to persist between requests
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+// Database-backed token storage for Docker persistence
+import { prisma } from './db';
 
-const TOKENS_FILE = join(process.cwd(), 'tokens.json');
+export async function saveToken(token: string, userId: string, expiresAt: Date): Promise<void> {
+  // Clean up expired tokens
+  await prisma.session.deleteMany({
+    where: {
+      expiresAt: {
+        lt: new Date(),
+      },
+    },
+  });
 
-interface TokenData {
-  userId: string;
-  expiresAt: string; // ISO string
-}
-
-interface TokenStore {
-  [token: string]: TokenData;
-}
-
-export function saveToken(token: string, userId: string, expiresAt: Date): void {
-  let tokens: TokenStore = {};
-  
-  // Load existing tokens
-  if (existsSync(TOKENS_FILE)) {
-    try {
-      tokens = JSON.parse(readFileSync(TOKENS_FILE, 'utf-8'));
-    } catch (e) {
-      console.log('Error reading tokens file, starting fresh');
-    }
-  }
-  
-  // Add new token
-  tokens[token] = {
-    userId,
-    expiresAt: expiresAt.toISOString()
-  };
-  
-  // Clean expired tokens
-  const now = new Date();
-  Object.keys(tokens).forEach(key => {
-    if (new Date(tokens[key].expiresAt) < now) {
-      delete tokens[key];
-    }
+  // Create new session
+  await prisma.session.create({
+    data: {
+      token,
+      userId,
+      expiresAt,
+    },
   });
   
-  // Save to file
-  writeFileSync(TOKENS_FILE, JSON.stringify(tokens, null, 2));
   console.log('Token saved:', token);
 }
 
-export function validateToken(token: string): { userId: string } | null {
-  if (!existsSync(TOKENS_FILE)) {
-    console.log('No tokens file found');
-    return null;
-  }
-  
+export async function validateToken(token: string): Promise<{ userId: string } | null> {
   try {
-    const tokens: TokenStore = JSON.parse(readFileSync(TOKENS_FILE, 'utf-8'));
-    const tokenData = tokens[token];
-    
-    if (!tokenData) {
+    const session = await prisma.session.findUnique({
+      where: { token },
+    });
+
+    if (!session) {
       console.log('Token not found:', token);
       return null;
     }
-    
-    if (new Date(tokenData.expiresAt) < new Date()) {
+
+    if (session.expiresAt < new Date()) {
       console.log('Token expired:', token);
+      // Token expired, remove it
+      await prisma.session.delete({
+        where: { token },
+      });
       return null;
     }
-    
+
     console.log('Token valid:', token);
-    return { userId: tokenData.userId };
+    return { userId: session.userId };
   } catch (e) {
-    console.log('Error reading tokens:', e);
+    console.log('Error validating token:', e);
     return null;
   }
 }
