@@ -44,8 +44,8 @@ docker logs -f glabs-website
 ### Step 5: Test Login
 1. Go to: `https://g-labs.my.id/admin/auth`
 2. Login with:
-   - Email: `admin@geraldlabs.dev`
-   - Password: `admin123`
+   - **Email:** `admin@g-labs.com`
+   - **Password:** `admin`
 
 ## 🔧 If Login Still Doesn't Work
 

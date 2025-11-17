@@ -12,8 +12,13 @@ if (Astro.request.method === 'POST') {
   const formData = await Astro.request.formData();
   const email = formData.get('email')?.toString();
   const password = formData.get('password')?.toString();
+  const secret = formData.get('secret')?.toString();
   
-  if (email && password) {
+  // Validate secret key
+  const adminSecret = import.meta.env.ADMIN_SECRET || '123';
+  if (secret !== adminSecret) {
+    loginResult = 'Invalid secret key';
+  } else if (email && password) {
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -27,7 +32,7 @@ if (Astro.request.method === 'POST') {
       // Redirect to admin with token
       return Astro.redirect(`/admin/dashboard?token=${authToken}`);
     } else {
-      loginResult = 'Invalid credentials';
+      loginResult = 'Invalid email or password';
     }
   }
 }
@@ -78,6 +83,20 @@ if (Astro.request.method === 'POST') {
               required
               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
               placeholder="Enter your password"
+            />
+          </div>
+          
+          <div>
+            <label for="secret" class="block text-sm font-medium text-slate-700 mb-2">
+              Secret Key
+            </label>
+            <input
+              type="password"
+              id="secret"
+              name="secret"
+              required
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+              placeholder="Enter secret key"
             />
           </div>
           

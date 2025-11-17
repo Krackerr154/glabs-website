@@ -36,9 +36,12 @@ cat > .env << 'EOF'
 # Database
 DATABASE_URL="file:./prod.db"
 
-# Admin Credentials - CHANGE THESE!
-ADMIN_EMAIL="admin@geraldlabs.dev"
-ADMIN_PASSWORD="admin123"
+# Admin Credentials
+ADMIN_EMAIL="admin@g-labs.com"
+ADMIN_PASSWORD="admin"
+
+# Session Secret
+SESSION_SECRET="123"
 
 # Domain
 PUBLIC_SITE_URL="https://g-labs.my.id"
@@ -78,8 +81,8 @@ docker logs -f glabs-website
 
 1. Visit: `https://g-labs.my.id/admin/auth`
 2. Use credentials from `.env`:
-   - Email: `admin@geraldlabs.dev`
-   - Password: `admin123`
+   - Email: `admin@g-labs.com`
+   - Password: `admin`
 
 ## 📊 Key Changes for Docker
 
