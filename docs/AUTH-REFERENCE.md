@@ -12,7 +12,7 @@
 ADMIN_EMAIL="admin@g-labs.com"
 ADMIN_PASSWORD="admin"
 SESSION_SECRET="123"
-DATABASE_URL="file:./prod.db"
+DATABASE_URL="file:./dev.db"
 ```
 
 ## Quick Commands for NAT Machine
