@@ -56,7 +56,7 @@ Successfully implemented a minimal backend with admin interface for your Astro p
 
 ### Admin Pages
 
-11. **`src/pages/admin/login.astro`** - Admin login page
+11. **`src/pages/admin/auth.astro`** - Admin login page
 
 12. **`src/pages/admin/index.astro`** - Admin dashboard (statistics overview)
 
@@ -158,7 +158,7 @@ Successfully implemented a minimal backend with admin interface for your Astro p
 
 ## How Authentication Works
 
-1. Admin navigates to `/admin/login`
+1. Admin navigates to `/admin/auth`
 2. Submits email + password
 3. Server verifies against hashed password in database
 4. Creates session with random ID
@@ -197,7 +197,7 @@ SESSION_SECRET="random-secret-string"
 4. Push schema to database: `npm run db:push`
 5. Seed admin user: `npm run db:seed`
 6. Start dev server: `npm run dev`
-7. Login at `http://localhost:4321/admin/login`
+7. Login at `http://localhost:4321/admin/auth`
 
 ## Build & Deploy
 
@@ -271,7 +271,7 @@ The old content collection system (markdown files in `src/content/`) is replaced
 ## Testing the System
 
 1. **Login Test**:
-   - Go to `/admin/login`
+   - Go to `/admin/auth`
    - Try wrong credentials (should fail)
    - Try correct credentials (should succeed)
 

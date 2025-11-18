@@ -8,7 +8,7 @@ import { prisma } from '../../lib/db';
 try {
   requireAuth(Astro.cookies);
 } catch {
-  return Astro.redirect('/admin/login');
+  return Astro.redirect('/admin/auth');
 }
 
 // Get statistics

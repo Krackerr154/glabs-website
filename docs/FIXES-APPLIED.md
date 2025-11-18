@@ -33,7 +33,7 @@ npm run db:seed
 npm run dev
 ```
 
-Then login at: **http://localhost:4321/admin/login**
+Then login at: **http://localhost:4321/admin/auth**
 
 ## 📁 What Was Built
 

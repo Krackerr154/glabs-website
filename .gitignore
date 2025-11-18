@@ -15,7 +15,9 @@ node_modules/
 *.db
 *.db-journal
 prisma/migrations/
-tokens.json
+
+# Nested duplicate folders
+glabs-website/
 
 # Logs
 logs/

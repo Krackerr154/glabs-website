@@ -8,7 +8,7 @@ import { generateSlug } from '../../../lib/utils';
 try {
   requireAuth(Astro.cookies);
 } catch {
-  return Astro.redirect('/admin/login');
+  return Astro.redirect('/admin/auth');
 }
 
 let error = '';

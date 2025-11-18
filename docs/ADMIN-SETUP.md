@@ -66,13 +66,13 @@ npm run dev
 
 The site will be available at:
 - Public site: http://localhost:4321
-- Admin login: http://localhost:4321/admin/login
+- Admin login: http://localhost:4321/admin/auth
 
 ## Admin Panel Usage
 
 ### Logging In
 
-1. Navigate to `/admin/login`
+1. Navigate to `/admin/auth`
 2. Enter your email and password from `.env`
 3. You'll be redirected to the admin dashboard
 
@@ -275,7 +275,7 @@ SQLite doesn't handle concurrent writes well. This shouldn't be an issue with a 
 
 ### Content API (Protected)
 
-All admin routes require authentication. Requests without valid session redirect to `/admin/login`.
+All admin routes require authentication. Requests without valid session redirect to `/admin/auth`.
 
 - Notes: `/api/notes/[id]/delete`
 - Experiments: `/api/experiments/[id]/delete`

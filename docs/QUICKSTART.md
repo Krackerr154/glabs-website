@@ -53,7 +53,7 @@ The server will start at: **http://localhost:4321**
 
 ## Step 5: Access Admin Panel
 
-1. Open browser to: **http://localhost:4321/admin/login**
+1. Open browser to: **http://localhost:4321/admin/auth**
 2. Login with credentials from `.env`:
    - Email: `admin@example.com`
    - Password: `changeme123`
@@ -147,4 +147,4 @@ Change port in `astro.config.mjs` or kill the process using port 4321
 
 ---
 
-**You're all set!** 🎉 Start by logging into `/admin/login` and creating your first content.
+**You're all set!** 🎉 Start by logging into `/admin/auth` and creating your first content.

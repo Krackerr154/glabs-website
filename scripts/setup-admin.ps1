@@ -31,6 +31,6 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "1. Edit .env file with your admin credentials" -ForegroundColor White
 Write-Host "2. Run 'npm run dev' to start the development server" -ForegroundColor White
-Write-Host "3. Visit http://localhost:4321/admin/login to access the admin panel" -ForegroundColor White
+Write-Host "3. Visit http://localhost:4321/admin/auth to access the admin panel" -ForegroundColor White
 Write-Host ""
 Write-Host "📚 See ADMIN-SETUP.md for detailed documentation" -ForegroundColor Yellow

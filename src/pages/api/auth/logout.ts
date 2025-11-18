@@ -4,7 +4,7 @@ import { clearSessionCookie } from '../../../lib/auth';
 
 export const POST: APIRoute = async ({ cookies, redirect }) => {
   clearSessionCookie(cookies);
-  return redirect('/admin/login');
+  return redirect('/admin/auth');
 };
 
 

@@ -1,62 +1,97 @@
 # Gerald Arya - Personal Website
 
-A modern, performant personal website built with Astro and Tailwind CSS. Features include project showcases, research highlights, technical notes, and an integrated contact form.
+A modern, performant personal website built with Astro and Tailwind CSS. Features project showcases, research highlights, technical notes, and an admin panel for content management.
 
-## 🎨 Design
+🌐 **Live Site**: [g-labs.my.id](https://g-labs.my.id)
+
+## 🎨 Design Philosophy
 
 - **Color Scheme**: Navy (#1e293b) and Cyan (#06b6d4)
-- **Typography**: Inter font family
-- **Accessibility**: WCAG-AA compliant
-- **Performance**: Optimized for fast LCP with minimal JavaScript
+- **Typography**: Inter font family for optimal readability
+- **Accessibility**: WCAG-AA compliant with semantic HTML
+- **Performance**: Optimized for fast LCP with minimal client-side JavaScript
 
-## 🚀 Features
+## ✨ Key Features
 
-- ✅ **Static Site Generation** - Lightning-fast load times
-- ✅ **Content Collections** - Markdown-based content management for projects and notes
-- ✅ **Dynamic Routing** - Slug-based routing for projects and notes
-- ✅ **SEO Optimized** - Open Graph, Twitter Cards, JSON-LD structured data
-- ✅ **Accessible** - WCAG-AA compliance with semantic HTML
-- ✅ **Responsive** - Mobile-first design
-- ✅ **Contact Integration** - n8n webhook for form submissions
-- ✅ **Docker Ready** - Containerized with Docker Compose
-- ✅ **One-Command Deployment** - Automated deployment scripts
-- ✅ **Navy/Cyan Theme** - Professional color scheme with animated gradients
+- 🚀 **Static Site Generation** - Lightning-fast page loads with Astro
+- 📝 **Admin Dashboard** - Built-in CMS for managing projects, notes, and research
+- 🔐 **Secure Authentication** - Database-backed token authentication
+- 📁 **Content Collections** - Organized markdown-based content management
+- 🎯 **SEO Optimized** - Open Graph, Twitter Cards, JSON-LD structured data
+- ♿ **Fully Accessible** - WCAG-AA compliance throughout
+- 📱 **Mobile-First Design** - Responsive across all devices
+- 🐳 **Docker Ready** - Containerized deployment with Docker Compose
+- 🗄️ **SQLite Database** - Prisma ORM for data management
 
 ## 📁 Project Structure
 
 ```text
 /
-├── public/              # Static assets
+├── docs/                # Documentation files
+├── prisma/              # Database schema and migrations
+│   ├── schema.prisma    # Prisma schema definition
+│   └── seed.js          # Database seeding script
+├── public/              # Static assets (favicon, robots.txt)
+├── scripts/             # Deployment and utility scripts
 ├── src/
-│   ├── components/      # Reusable components
-│   ├── content/         # Markdown content
-│   │   ├── projects/    # Project markdown files
-│   │   ├── notes/       # Note markdown files
-│   │   └── config.ts    # Content collection schemas
+│   ├── content/         # Markdown content collections
+│   │   ├── notes/       # Technical notes and blog posts
+│   │   ├── projects/    # Project showcases
+│   │   └── config.ts    # Content schemas
 │   ├── layouts/         # Page layouts
 │   │   └── BaseLayout.astro
-│   ├── pages/           # Page routes
-│   │   ├── index.astro
-│   │   ├── projects.astro
-│   │   ├── projects/[slug].astro
-│   │   ├── notes.astro
-│   │   ├── notes/[slug].astro
-│   │   ├── research.astro
-│   │   ├── about.astro
-│   │   ├── contact.astro
-│   │   └── 404.astro
-│   ├── styles/          # Global styles
-│   │   └── global.css
-│   └── utils/           # Utility functions
-├── .github/
-│   └── copilot-instructions.md
-├── Dockerfile
-├── docker-compose.yml
-├── nginx.conf
-└── astro.config.mjs
+│   ├── lib/             # Core utilities
+│   │   ├── auth.ts      # Authentication helpers
+│   │   ├── db.ts        # Prisma database client
+│   │   ├── tokens.ts    # Token management
+│   │   └── utils.ts     # Helper functions
+│   ├── pages/           # Application routes
+│   │   ├── admin/       # Admin dashboard & CMS
+│   │   ├── api/         # API endpoints
+│   │   ├── notes/       # Notes listing and detail pages
+│   │   ├── projects/    # Projects listing and detail pages
+│   │   └── *.astro      # Public pages (home, about, contact, etc.)
+│   ├── styles/          # Global CSS
+│   └── utils/           # Frontend utilities
+├── .github/             # GitHub configuration
+├── Dockerfile           # Docker container definition
+├── docker-compose.yml   # Docker Compose configuration
+├── nginx.conf           # Nginx web server config
+└── astro.config.mjs     # Astro framework configuration
 ```
 
-## 🛠️ Commands
+## 🛠️ Development
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Git
+
+### Local Setup
+
+```bash
+# Clone repository
+git clone https://github.com/Krackerr154/glabs-website.git
+cd glabs-website
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+
+# Initialize database
+npx prisma generate
+npx prisma db push
+npm run db:seed
+
+# Start development server
+npm run dev
+```
+
+Visit `http://localhost:4321` to view the site.
+
+### Available Commands
 
 | Command | Action |
 |---------|--------|
@@ -64,82 +99,103 @@ A modern, performant personal website built with Astro and Tailwind CSS. Feature
 | `npm run dev` | Start dev server at `localhost:4321` |
 | `npm run build` | Build production site to `./dist/` |
 | `npm run preview` | Preview production build locally |
-| `npm run astro ...` | Run Astro CLI commands |
+| `npm run db:seed` | Seed database with sample data |
+| `npx prisma studio` | Open Prisma Studio to view database |
 
-## � VPS Deployment (Recommended)
+## 🔐 Admin Dashboard
 
-### Quick Deploy (3 Steps)
+Access the admin panel at `/admin/auth` with default credentials:
 
-1. **Setup VPS** (one-time):
-```bash
-scp setup-vps.sh user@your-vps-ip:/tmp/
-ssh user@your-vps-ip 'bash /tmp/setup-vps.sh'
-```
+- **Email**: `admin@g-labs.com`
+- **Password**: `admin`
 
-2. **Configure environment** on VPS:
-```bash
-ssh user@your-vps-ip 'nano /opt/glabs-website/.env'
-```
+⚠️ **Important**: Change the default credentials in production by updating the `.env` file and reseeding the database.
 
-3. **Deploy**:
-```bash
-# Linux/Mac
-chmod +x deploy.sh
-export DEPLOY_HOST=your.vps.ip
-export DEPLOY_USER=your-username
-./deploy.sh
+### Admin Features
 
-# Windows PowerShell
-$env:DEPLOY_HOST='your.vps.ip'
-$env:DEPLOY_USER='your-username'
-.\deploy.ps1
-```
+- 📝 Create, edit, and delete notes
+- 🚀 Manage project showcases
+- 🔬 Organize research experiments
+- 📊 View content statistics
+- 🔒 Secure token-based authentication
 
-**Done!** Site live at `http://your-vps-ip:8080`
+## 🐳 Docker Deployment
 
-📖 **Full Guide**: See [DEPLOY-QUICK.md](DEPLOY-QUICK.md) for detailed instructions
-
-### Available Deployment Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `setup-vps.sh` | Initial VPS setup (run once) |
-| `deploy.sh` / `deploy.ps1` | Deploy website |
-| `check-status.sh` | Check deployment status |
-| `logs.sh` | View container logs |
-| `restart.sh` | Restart container |
-
-📚 **Scripts Guide**: See [SCRIPTS-README.md](SCRIPTS-README.md)
-
-## 🐳 Local Docker Testing
-
-### Build and run with Docker Compose:
+### Quick Start
 
 ```bash
+# Build and start containers
 docker-compose up -d
+
+# View logs
+docker logs -f glabs-website
+
+# Stop containers
+docker-compose down
 ```
 
 The site will be available at `http://localhost:8080`
 
-### Build Docker image manually:
+### Production Deployment
 
-```bash
-docker build -t glabs-website .
-docker run -p 8080:80 glabs-website
-```
+See the comprehensive deployment guides in the `docs/` directory:
+
+- 📘 **[NAT-DEPLOYMENT.md](docs/NAT-DEPLOYMENT.md)** - Deploy to NAT/VPS environment
+- 📗 **[DOCKER-DEPLOYMENT.md](docs/DOCKER-DEPLOYMENT.md)** - Full Docker deployment guide
+- 📕 **[AUTH-REFERENCE.md](docs/AUTH-REFERENCE.md)** - Authentication quick reference
+
+### Deployment Scripts
+
+Located in `scripts/` directory:
+
+| Script | Purpose |
+|--------|---------|
+| `deploy.sh` / `deploy.ps1` | Deploy to server |
+| `setup-vps.sh` | Initial VPS setup |
+| `check-status.sh` | Check deployment status |
+| `logs.sh` | View container logs |
+| `restart.sh` | Restart containers |
 
 ## ⚙️ Configuration
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and configure:
+Create a `.env` file based on `.env.example`:
 
 ```env
-PUBLIC_N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/contact
-PUBLIC_SITE_URL=https://geraldarya.com
+# Database
+DATABASE_URL="file:./dev.db"
+
+# Admin Credentials
+ADMIN_EMAIL="admin@g-labs.com"
+ADMIN_PASSWORD="admin"
+
+# Session Security
+SESSION_SECRET="your-secret-key-here"
+
+# Public URLs
+PUBLIC_SITE_URL="https://g-labs.my.id"
+```
+
+### Database Management
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Apply schema changes
+npx prisma db push
+
+# Seed database
+npm run db:seed
+
+# Open Prisma Studio
+npx prisma studio
 ```
 
 ### Content Management
+
+Use the admin dashboard at `/admin/auth` to manage content through the web interface, or manually create markdown files:
 
 #### Adding Projects
 
@@ -148,16 +204,16 @@ Create a new markdown file in `src/content/projects/`:
 ```markdown
 ---
 title: "Project Title"
-description: "Project description"
+description: "Brief project description"
 publishedAt: 2024-11-12
 featured: true
-technologies: ["Astro", "TypeScript"]
+technologies: ["Astro", "TypeScript", "Tailwind"]
 githubUrl: "https://github.com/username/repo"
 liveUrl: "https://example.com"
 tags: ["web", "development"]
 ---
 
-Your project content here...
+Your detailed project content here...
 ```
 
 #### Adding Notes
@@ -167,10 +223,10 @@ Create a new markdown file in `src/content/notes/`:
 ```markdown
 ---
 title: "Note Title"
-description: "Note description"
+description: "Brief note description"
 publishedAt: 2024-11-12
 draft: false
-tags: ["tag1", "tag2"]
+tags: ["javascript", "tutorial"]
 category: "Development"
 ---
 

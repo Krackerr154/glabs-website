@@ -8,7 +8,7 @@ import { formatDate } from '../../../lib/utils';
 try {
   requireAuth(Astro.cookies);
 } catch {
-  return Astro.redirect('/admin/login');
+  return Astro.redirect('/admin/auth');
 }
 
 const experiments = await prisma.experiment.findMany({
