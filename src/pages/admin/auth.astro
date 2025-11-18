@@ -1,39 +1,62 @@
 ---
-// Simple token-based authentication without cookies
+// Token-based authentication
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { prisma } from '../../lib/db';
 import bcrypt from 'bcryptjs';
 import { generateToken, saveToken } from '../../lib/tokens';
 
-let loginResult = '';
+let errorMessage = '';
+let emailValue = '';
 
 // Handle form submission
 if (Astro.request.method === 'POST') {
-  const formData = await Astro.request.formData();
-  const email = formData.get('email')?.toString();
-  const password = formData.get('password')?.toString();
-  const secret = formData.get('secret')?.toString();
-  
-  // Validate secret key
-  const adminSecret = import.meta.env.ADMIN_SECRET || '123';
-  if (secret !== adminSecret) {
-    loginResult = 'Invalid secret key';
-  } else if (email && password) {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+  try {
+    const formData = await Astro.request.formData();
+    const email = formData.get('email')?.toString() || '';
+    const password = formData.get('password')?.toString() || '';
     
-    if (user && await bcrypt.compare(password, user.password)) {
-      // Generate token and save to database
-      const authToken = generateToken();
-      const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
-      await saveToken(authToken, user.id, expiresAt);
-      
-      // Redirect to admin with token
-      return Astro.redirect(`/admin/dashboard?token=${authToken}`);
+    emailValue = email; // Preserve email for form
+    
+    console.log('🔐 Login attempt for:', email);
+    
+    // Validate inputs
+    if (!email || !password) {
+      errorMessage = 'Please enter both email and password';
     } else {
-      loginResult = 'Invalid email or password';
+      // Find user in database
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+      
+      console.log('👤 User found:', user ? 'Yes' : 'No');
+      
+      if (!user) {
+        errorMessage = 'Invalid email or password';
+        console.log('❌ User not found');
+      } else {
+        // Verify password
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        console.log('🔑 Password valid:', isValidPassword);
+        
+        if (!isValidPassword) {
+          errorMessage = 'Invalid email or password';
+          console.log('❌ Password incorrect');
+        } else {
+          // Generate token and save to database
+          const authToken = generateToken();
+          const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
+          await saveToken(authToken, user.id, expiresAt);
+          
+          console.log('✅ Login successful, token created');
+          
+          // Redirect to dashboard with token
+          return Astro.redirect(`/admin/dashboard?token=${authToken}`);
+        }
+      }
     }
+  } catch (error) {
+    console.error('❌ Login error:', error);
+    errorMessage = 'An error occurred during login. Please try again.';
   }
 }
 ---
@@ -51,9 +74,12 @@ if (Astro.request.method === 'POST') {
       </div>
       
       <div class="card p-8">
-        {loginResult && (
-          <div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
-            {loginResult}
+        {errorMessage && (
+          <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm flex items-start gap-2">
+            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <span>{errorMessage}</span>
           </div>
         )}
         
@@ -67,8 +93,9 @@ if (Astro.request.method === 'POST') {
               id="email"
               name="email"
               required
+              value={emailValue}
               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
-              placeholder="admin@example.com"
+              placeholder="admin@g-labs.com"
             />
           </div>
           
@@ -86,20 +113,6 @@ if (Astro.request.method === 'POST') {
             />
           </div>
           
-          <div>
-            <label for="secret" class="block text-sm font-medium text-slate-700 mb-2">
-              Secret Key
-            </label>
-            <input
-              type="password"
-              id="secret"
-              name="secret"
-              required
-              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
-              placeholder="Enter secret key"
-            />
-          </div>
-          
           <button
             type="submit"
             class="w-full btn-primary text-center"
@@ -108,7 +121,15 @@ if (Astro.request.method === 'POST') {
           </button>
         </form>
         
-        <div class="mt-6 text-center">
+        <div class="mt-6 pt-6 border-t border-slate-200">
+          <p class="text-sm text-slate-600 text-center">
+            <strong>Default Credentials:</strong><br>
+            Email: admin@g-labs.com<br>
+            Password: admin
+          </p>
+        </div>
+        
+        <div class="mt-4 text-center">
           <a href="/" class="text-sm text-cyan-600 hover:text-cyan-700">
             ← Back to Home
           </a>

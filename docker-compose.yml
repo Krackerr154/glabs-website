@@ -12,6 +12,11 @@ services:
       - NODE_ENV=production
       - PORT=4321
       - DATABASE_URL=file:./prisma/dev.db
+      - ADMIN_EMAIL=admin@g-labs.com
+      - ADMIN_PASSWORD=admin
+      - SESSION_SECRET=123
+      - PUBLIC_SITE_URL=https://g-labs.my.id
+      
     restart: unless-stopped
     networks:
       - glabs-network
