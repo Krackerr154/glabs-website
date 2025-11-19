@@ -22,11 +22,11 @@ const updatedDate = formatDate(note.updatedAt);
 ---
 
 <BaseLayout 
-  title={note.data.title}
-  description={note.data.description}
+  title={note.title}
+  description={note.description || ''}
   type="article"
-  publishedTime={note.data.publishedAt.toISOString()}
-  modifiedTime={note.data.updatedAt?.toISOString()}
+  publishedTime={note.createdAt.toISOString()}
+  modifiedTime={note.updatedAt.toISOString()}
 >
   <article class="section-padding">
     <div class="container mx-auto max-w-4xl">

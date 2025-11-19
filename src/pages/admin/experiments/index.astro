@@ -1,13 +1,15 @@
 ---
 // Admin - List all experiments
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { requireAuth } from '../../../lib/auth';
+import { validateToken } from '../../../lib/tokens';
 import { prisma } from '../../../lib/db';
 import { formatDate } from '../../../lib/utils';
 
-try {
-  requireAuth(Astro.cookies);
-} catch {
+// Get token from URL
+const urlParams = new URL(Astro.url).searchParams;
+const token = urlParams.get('token');
+
+if (!token || !(await validateToken(token))) {
   return Astro.redirect('/admin/auth');
 }
 
@@ -24,12 +26,12 @@ const experiments = await prisma.experiment.findMany({
       <div class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div>
-            <a href="/admin" class="text-sm text-cyan-600 hover:text-cyan-700 mb-2 inline-block">
+            <a href={`/admin?token=${token}`} class="text-sm text-cyan-600 hover:text-cyan-700 mb-2 inline-block">
               ← Back to Dashboard
             </a>
             <h1 class="text-2xl font-bold text-slate-800">Manage Experiments</h1>
           </div>
-          <a href="/admin/experiments/new" class="btn-primary">
+          <a href={`/admin/experiments/new?token=${token}`} class="btn-primary">
             + New Experiment
           </a>
         </div>
@@ -40,7 +42,7 @@ const experiments = await prisma.experiment.findMany({
       {experiments.length === 0 ? (
         <div class="card p-12 text-center">
           <p class="text-slate-600 mb-4">No experiments yet</p>
-          <a href="/admin/experiments/new" class="btn-primary inline-block">
+          <a href={`/admin/experiments/new?token=${token}`} class="btn-primary inline-block">
             Create Your First Experiment
           </a>
         </div>
@@ -75,7 +77,7 @@ const experiments = await prisma.experiment.findMany({
                   </td>
                   <td class="px-6 py-4 text-sm text-slate-600">{formatDate(exp.updatedAt)}</td>
                   <td class="px-6 py-4 text-right text-sm font-medium space-x-3">
-                    <a href={`/admin/experiments/edit/${exp.id}`} class="text-cyan-600 hover:text-cyan-700">Edit</a>
+                    <a href={`/admin/experiments/edit/${exp.id}?token=${token}`} class="text-cyan-600 hover:text-cyan-700">Edit</a>
                     <button
                       onclick={`if(confirm('Delete this experiment?')) window.location.href='/api/experiments/${exp.id}/delete'`}
                       class="text-red-600 hover:text-red-700"

@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { prisma } from '../../lib/db';
 import bcrypt from 'bcryptjs';
 import { generateToken, saveToken } from '../../lib/tokens';
+import { createSession, setSessionCookie } from '../../lib/auth';
 
 let errorMessage = '';
 let emailValue = '';
@@ -47,7 +48,11 @@ if (Astro.request.method === 'POST') {
           const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 1000); // 24 hours
           await saveToken(authToken, user.id, expiresAt);
           
-          console.log('✅ Login successful, token created');
+          // Also create cookie-based session for edit pages
+          const sessionId = await createSession(user.id);
+          setSessionCookie(Astro.cookies, sessionId);
+          
+          console.log('✅ Login successful, token and cookie created');
           
           // Redirect to dashboard with token
           return Astro.redirect(`/admin/dashboard?token=${authToken}`);

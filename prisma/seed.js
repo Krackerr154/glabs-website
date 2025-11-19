@@ -80,32 +80,37 @@ Performance optimization is crucial for user experience and should be considered
     },
   });
 
-  // Create sample project
+  // Create sample projects matching the markdown content collection slugs
   await prisma.project.upsert({
-    where: { slug: 'personal-portfolio' },
+    where: { slug: 'portfolio-website' },
     update: {},
     create: {
-      title: 'Personal Portfolio Website',
-      slug: 'personal-portfolio',
+      title: 'Portfolio Website',
+      slug: 'portfolio-website',
       description: 'A modern, responsive portfolio website built with Astro and Tailwind CSS',
-      content: `# Personal Portfolio Website
-
-A showcase of my work, research, and technical writing.
-
-## Features
-- Fast static site generation with Astro
-- Beautiful UI with Tailwind CSS
-- Content management system
-- SEO optimized
-
-## Tech Stack
-Built with modern web technologies for optimal performance.`,
-      techStack: JSON.stringify(['Astro', 'TypeScript', 'Tailwind CSS', 'Prisma', 'SQLite']),
+      content: `Personal portfolio showcasing projects and technical writing.`,
+      techStack: JSON.stringify(['Astro', 'TypeScript', 'Tailwind CSS', 'Prisma']),
       status: 'completed',
       featured: true,
       published: true,
-      githubUrl: 'https://github.com/yourusername/portfolio',
-      liveUrl: 'https://geraldarya.com',
+      githubUrl: 'https://github.com/Krackerr154/glabs-website',
+      liveUrl: 'https://g-labs.my.id',
+    },
+  });
+
+  await prisma.project.upsert({
+    where: { slug: 'task-management-api' },
+    update: {},
+    create: {
+      title: 'Task Management API',
+      slug: 'task-management-api',
+      description: 'RESTful API for task management with authentication',
+      content: `A robust task management API built with modern technologies.`,
+      techStack: JSON.stringify(['Node.js', 'Express', 'MongoDB', 'JWT']),
+      status: 'completed',
+      featured: false,
+      published: true,
+      githubUrl: 'https://github.com/Krackerr154/task-api',
     },
   });
 
