@@ -15,7 +15,7 @@ ENV DATABASE_URL="file:./prisma/dev.db"
 # Generate Prisma client dan sync schema
 RUN npx prisma generate
 RUN npx prisma db push
-RUN npx prisma db:seed
+RUN npm run db:seed
 
 # 4) Build Astro (SSR)
 RUN npm run build
