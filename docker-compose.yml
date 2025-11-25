@@ -11,11 +11,14 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4321
-      - DATABASE_URL=file:./dev.db
+      - DATABASE_URL=file:/data/dev.db
       - ADMIN_EMAIL=admin@g-labs.com
       - ADMIN_PASSWORD=admin
       - SESSION_SECRET=123
       - PUBLIC_SITE_URL=https://g-labs.my.id
+    
+    volumes:
+      - db-data:/data
       
     restart: unless-stopped
     networks:
@@ -30,3 +33,6 @@ services:
 networks:
   glabs-network:
     driver: bridge
+
+volumes:
+  db-data:

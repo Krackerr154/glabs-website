@@ -9,13 +9,8 @@ RUN npm ci
 # 2) Copy source code
 COPY . .
 
-# 3) Prisma: set database URL (SQLite file di dalam container)
-ENV DATABASE_URL="file:./prisma/dev.db"
-
-# Generate Prisma client dan sync schema
+# 3) Prisma: Generate client
 RUN npx prisma generate
-RUN npx prisma db push
-RUN npm run db:seed
 
 # 4) Build Astro (SSR)
 RUN npm run build
@@ -23,8 +18,12 @@ RUN npm run build
 # 5) Runtime env
 ENV NODE_ENV=production
 ENV PORT=4321
+ENV DATABASE_URL="file:/data/dev.db"
+
+# 6) Create volume for persistent database
+VOLUME /data
 
 EXPOSE 4321
 
-# 6) Start Astro Node adapter
-CMD ["node", "./dist/server/entry.mjs"]
+# 7) Initialize database on first run and start server
+CMD sh -c "npx prisma db push --accept-data-loss && npm run db:seed && node ./dist/server/entry.mjs"
