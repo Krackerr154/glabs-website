@@ -1,15 +1,15 @@
 ---
 // Admin dashboard - main overview page
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { validateToken } from '../../lib/tokens';
-import { prisma } from '../../lib/db';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { validateToken } from "../../lib/tokens";
+import { prisma } from "../../lib/db";
 
 // Get token from URL
 const urlParams = new URL(Astro.url).searchParams;
-const token = urlParams.get('token');
+const token = urlParams.get("token");
 
 if (!token || !(await validateToken(token))) {
-  return Astro.redirect('/admin/auth');
+  return Astro.redirect("/admin/auth");
 }
 
 // Get statistics
@@ -18,10 +18,12 @@ const experimentsCount = await prisma.experiment.count();
 const projectsCount = await prisma.project.count();
 
 const publishedNotes = await prisma.note.count({ where: { published: true } });
-const publishedExperiments = await prisma.experiment.count({ where: { published: true } });
-const publishedProjects = await prisma.project.count({ where: { published: true } });
-
-
+const publishedExperiments = await prisma.experiment.count({
+  where: { published: true },
+});
+const publishedProjects = await prisma.project.count({
+  where: { published: true },
+});
 ---
 
 <BaseLayout title="Admin Dashboard" description="Content management dashboard">
@@ -35,11 +37,18 @@ const publishedProjects = await prisma.project.count({ where: { published: true 
             <p class="text-sm text-slate-600">Content Management System</p>
           </div>
           <div class="flex items-center gap-4">
-            <a href="/" class="text-sm text-slate-600 hover:text-slate-800" target="_blank">
+            <a
+              href="/"
+              class="text-sm text-slate-600 hover:text-slate-800"
+              target="_blank"
+            >
               View Site →
             </a>
             <form method="POST" action="/api/auth/logout">
-              <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">
+              <button
+                type="submit"
+                class="text-sm text-red-600 hover:text-red-700 font-medium"
+              >
                 Logout
               </button>
             </form>
@@ -55,12 +64,27 @@ const publishedProjects = await prisma.project.count({ where: { published: true 
         <!-- Notes Card -->
         <div class="card p-6">
           <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            <div
+              class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center"
+            >
+              <svg
+                class="w-6 h-6 text-cyan-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path>
               </svg>
             </div>
-            <a href={`/admin/notes?token=${token}`} class="text-cyan-600 hover:text-cyan-700 text-sm font-medium">
+            <a
+              href={`/admin/notes?token=${token}`}
+              class="text-cyan-600 hover:text-cyan-700 text-sm font-medium"
+            >
               Manage →
             </a>
           </div>
@@ -72,35 +96,73 @@ const publishedProjects = await prisma.project.count({ where: { published: true 
         <!-- Experiments Card -->
         <div class="card p-6">
           <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+            <div
+              class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
+            >
+              <svg
+                class="w-6 h-6 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                ></path>
               </svg>
             </div>
-            <a href={`/admin/experiments?token=${token}`} class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+            <a
+              href={`/admin/experiments?token=${token}`}
+              class="text-purple-600 hover:text-purple-700 text-sm font-medium"
+            >
               Manage →
             </a>
           </div>
-          <h3 class="text-2xl font-bold text-slate-800 mb-1">{experimentsCount}</h3>
+          <h3 class="text-2xl font-bold text-slate-800 mb-1">
+            {experimentsCount}
+          </h3>
           <p class="text-slate-600 text-sm">Total Experiments</p>
-          <p class="text-xs text-slate-500 mt-2">{publishedExperiments} published</p>
+          <p class="text-xs text-slate-500 mt-2">
+            {publishedExperiments} published
+          </p>
         </div>
 
         <!-- Projects Card -->
         <div class="card p-6">
           <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            <div
+              class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
+            >
+              <svg
+                class="w-6 h-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                ></path>
               </svg>
             </div>
-            <a href={`/admin/projects?token=${token}`} class="text-green-600 hover:text-green-700 text-sm font-medium">
+            <a
+              href={`/admin/projects?token=${token}`}
+              class="text-green-600 hover:text-green-700 text-sm font-medium"
+            >
               Manage →
             </a>
           </div>
-          <h3 class="text-2xl font-bold text-slate-800 mb-1">{projectsCount}</h3>
+          <h3 class="text-2xl font-bold text-slate-800 mb-1">
+            {projectsCount}
+          </h3>
           <p class="text-slate-600 text-sm">Total Projects</p>
-          <p class="text-xs text-slate-500 mt-2">{publishedProjects} published</p>
+          <p class="text-xs text-slate-500 mt-2">
+            {publishedProjects} published
+          </p>
         </div>
       </div>
 
@@ -108,13 +170,22 @@ const publishedProjects = await prisma.project.count({ where: { published: true 
       <div class="card p-6">
         <h2 class="text-xl font-bold text-slate-800 mb-4">Quick Actions</h2>
         <div class="grid md:grid-cols-3 gap-4">
-          <a href="/admin/notes/new" class="btn-primary text-center">
+          <a
+            href={`/admin/notes/new?token=${token}`}
+            class="btn-primary text-center"
+          >
             + New Note
           </a>
-          <a href="/admin/experiments/new" class="btn-primary text-center">
+          <a
+            href={`/admin/experiments/new?token=${token}`}
+            class="btn-primary text-center"
+          >
             + New Experiment
           </a>
-          <a href="/admin/projects/new" class="btn-primary text-center">
+          <a
+            href={`/admin/projects/new?token=${token}`}
+            class="btn-primary text-center"
+          >
             + New Project
           </a>
         </div>
@@ -122,4 +193,3 @@ const publishedProjects = await prisma.project.count({ where: { published: true 
     </main>
   </div>
 </BaseLayout>
-

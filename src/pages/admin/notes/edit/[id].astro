@@ -8,11 +8,7 @@ import { prisma } from '../../../../lib/db';
 const urlParams = new URL(Astro.url).searchParams;
 let token = urlParams.get('token');
 
-// If POST, get token from form
-if (Astro.request.method === 'POST') {
-  const formData = await Astro.request.formData();
-  token = formData.get('token')?.toString() || token;
-}
+
 
 if (!token || !(await validateToken(token))) {
   return Astro.redirect('/admin/auth');
